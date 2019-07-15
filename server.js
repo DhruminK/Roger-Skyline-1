@@ -20,6 +20,7 @@ const mimeType = e => {
         case ".gif" : return "image/gif";
         case ".ico" : return "image/vnd.microsoft.icon";
         default : return "text/plain";
+        
     }
 }
 
