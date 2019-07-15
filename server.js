@@ -3,8 +3,34 @@ const url = require('url');
 const fs = require('fs');
 const path = require('path');
 
+const mimeType = e => {
+    switch(e)
+    {
+        case ".html" : return "text/html";
+        case ".css" : return "text/css";
+        case ".js" : return "text/javascript";
+        case ".jpg" :
+        case ".jpeg" : return "image/jpeg";
+        case ".png" : return "image/png";
+        case ".svg" : return "image/svg+xml";
+        case ".tif" :
+        case ".tiff" : return "image/tiff";
+        case ".webp" : return "image/webp";
+        case ".bmp" : return "image/bmp";
+        case ".gif" : return "image/gif";
+        case ".ico" : return "image/vnd.microsoft.icon";
+        default : return "text/plain";
+    }
+}
+
 const indexFile = ({req, res}) =>
 {
+    const filePath = path.join(__dirname, 'public', 'html', 'index.html');
+    const stat = fs.statSync(filePath);
+    res.writeHead(200, {
+        "Content-Type" : mimeType(".html"),
+        "Content-Length" : stat.size
+    });
     let index = fs.createReadStream(path.join(__dirname, 'public', 'html', 'index.html'));
     index.on('error', () => {
         res.writeHead(404, {"Content-Type" : "text/plain"});
@@ -16,7 +42,13 @@ const indexFile = ({req, res}) =>
 
 const publicFile = ({req, res}) =>
 {
-    let file = fs.createReadStream(path.join(__dirname, (url.parse(req.url)).pathname));
+    const filePath = path.join(__dirname, (url.parse(req.url)).pathname);
+    const stat = fs.statSync(filePath);
+    res.writeHead(200, {
+        "Content-Type" : mimeType(path.extname(url.parse(req.url).pathname)),
+        "Content-Length" : stat.size
+    });
+    let file = fs.createReadStream(filePath);
     file.on('error', () => {
         res.writeHead(404, {"Content-Type" : "text/plain"});
         res.write("File not found");
